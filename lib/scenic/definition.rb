@@ -15,7 +15,13 @@ module Scenic
     end
 
     def full_path
-      Rails.root.join(path)
+      full_path = Rails.application.paths["db/migrate"].expanded.map { |p| p.gsub(/migrate$/, "views") }.find do |path|
+        File.exists?(Pathname.new(path).join(filename))
+      end
+
+      raise "Define view query in #{path} before migrating." if full_path.nil?
+
+      Pathname.new(full_path).join(filename)
     end
 
     def path
